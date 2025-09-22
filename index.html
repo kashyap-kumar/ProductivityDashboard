@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productivity Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .dark {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        .light {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+        }
+
+        .editable:hover {
+            background: var(--bg-tertiary);
+            cursor: pointer;
+        }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .icon-option {
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .icon-option:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .modal {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+        }
+
+        .btn {
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .custom-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--text-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            background: transparent;
+        }
+
+        .custom-checkbox:hover {
+            border-color: var(--accent);
+        }
+
+        .custom-checkbox.checked {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .recurring-todo-item {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border-left: 4px solid var(--success);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen p-4 light">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-4">
+            <h1 class="text-3xl font-bold">Productivity Dashboard</h1>
+            <div id="currentTime" class="text-xl font-mono px-4 py-2 card rounded-lg"></div>
+        </div>
+        <button id="themeToggle" class="btn px-4 py-2 card rounded-lg hover:shadow-lg">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <!-- Real-time Todos -->
+        <div class="card rounded-lg p-6 shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                    <i class="fas fa-tasks text-blue-500"></i>
+                    Real-time Todos
+                </h2>
+            </div>
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="realTimeTodoInput" placeholder="Add a todo..."
+                    class="flex-1 px-3 py-2 card rounded border-none outline-none">
+                <button id="addRealTimeTodo" class="btn px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div id="realTimeTodos" class="space-y-2 max-h-60 overflow-y-auto"></div>
+        </div>
+
+        <!-- Recurring Todos -->
+        <div class="card rounded-lg p-6 shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                    <i class="fas fa-redo text-green-500"></i>
+                    Recurring Todos
+                </h2>
+                <button id="addRecurringTodo"
+                    class="btn px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+            </div>
+            <div id="recurringTodos" class="space-y-3 max-h-60 overflow-y-auto"></div>
+        </div>
+
+        <!-- Frequently Used Links -->
+        <div class="card rounded-lg p-6 shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                    <i class="fas fa-link text-purple-500"></i>
+                    Quick Links
+                </h2>
+                <button id="addLink" class="btn px-3 py-1 bg-purple-500 text-white rounded text-sm hover:bg-purple-600">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+            </div>
+            <div id="linksList" class="space-y-3 max-h-60 overflow-y-auto"></div>
+        </div>
+
+        <!-- Motivation Quotes -->
+        <div class="card rounded-lg p-6 shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                    <i class="fas fa-quote-left text-yellow-500"></i>
+                    Daily Motivation
+                </h2>
+                <button id="addQuote"
+                    class="btn px-3 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+            </div>
+            <div id="quotesList" class="space-y-3 max-h-60 overflow-y-auto"></div>
+        </div>
+
+        <!-- Frequently Used Texts -->
+        <div class="card rounded-lg p-6 shadow-lg lg:col-span-2">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                    <i class="fas fa-clipboard text-indigo-500"></i>
+                    Quick Copy Texts
+                </h2>
+                <button id="addText" class="btn px-3 py-1 bg-indigo-500 text-white rounded text-sm hover:bg-indigo-600">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+            </div>
+            <div id="textsList" class="grid gap-3 max-h-60 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Recurring Todo Modal -->
+    <div id="recurringTodoModal" class="modal fixed inset-0 hidden items-center justify-center z-50">
+        <div class="modal-content rounded-lg p-6 w-96 mx-4">
+            <h3 class="text-lg font-semibold mb-4">Add Recurring Todo</h3>
+            <input type="text" id="recurringTodoTitle" placeholder="Todo title..."
+                class="w-full px-3 py-2 card rounded mb-3 border-none outline-none">
+            <select id="recurringTodoIcon" class="w-full px-3 py-2 card rounded mb-4 border-none outline-none">
+                <option value="fas fa-tasks">Task</option>
+                <option value="fas fa-dumbbell">Exercise</option>
+                <option value="fas fa-book">Study</option>
+                <option value="fas fa-briefcase">Work</option>
+                <option value="fas fa-home">Home</option>
+                <option value="fas fa-utensils">Meal</option>
+                <option value="fas fa-pills">Medicine</option>
+                <option value="fas fa-shopping-cart">Shopping</option>
+            </select>
+            <div class="flex justify-end gap-2">
+                <button id="cancelRecurringTodo" class="btn px-4 py-2 card rounded">Cancel</button>
+                <button id="saveRecurringTodo"
+                    class="btn px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link Modal -->
+    <div id="linkModal" class="modal fixed inset-0 hidden items-center justify-center z-50">
+        <div class="modal-content rounded-lg p-6 w-96 mx-4">
+            <h3 class="text-lg font-semibold mb-4">Add Quick Link</h3>
+            <input type="text" id="linkTitle" placeholder="Link title..."
+                class="w-full px-3 py-2 card rounded mb-3 border-none outline-none">
+            <input type="url" id="linkUrl" placeholder="https://..."
+                class="w-full px-3 py-2 card rounded mb-3 border-none outline-none">
+            <select id="linkIcon" class="w-full px-3 py-2 card rounded mb-4 border-none outline-none">
+                <option value="fas fa-globe">Website</option>
+                <option value="fab fa-github">GitHub</option>
+                <option value="fab fa-youtube">YouTube</option>
+                <option value="fab fa-twitter">Twitter</option>
+                <option value="fab fa-linkedin">LinkedIn</option>
+                <option value="fas fa-envelope">Email</option>
+                <option value="fas fa-file-alt">Documentation</option>
+                <option value="fas fa-shopping-cart">Shopping</option>
+            </select>
+            <div class="flex justify-end gap-2">
+                <button id="cancelLink" class="btn px-4 py-2 card rounded">Cancel</button>
+                <button id="saveLink"
+                    class="btn px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Text Modal -->
+    <div id="textModal" class="modal fixed inset-0 hidden items-center justify-center z-50">
+        <div class="modal-content rounded-lg p-6 w-96 mx-4">
+            <h3 class="text-lg font-semibold mb-4">Add Quick Copy Text</h3>
+            <input type="text" id="textTitle" placeholder="Text title..."
+                class="w-full px-3 py-2 card rounded mb-3 border-none outline-none">
+            <textarea id="textContent" placeholder="Your text content..."
+                class="w-full px-3 py-2 card rounded mb-4 h-32 border-none outline-none resize-none"></textarea>
+            <div class="flex justify-end gap-2">
+                <button id="cancelText" class="btn px-4 py-2 card rounded">Cancel</button>
+                <button id="saveText"
+                    class="btn px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // LocalStorage helper functions
+        function loadFromStorage(key, defaultValue = []) {
+            try {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : defaultValue;
+            } catch (error) {
+                console.error(`Error loading ${key} from localStorage:`, error);
+                return defaultValue;
+            }
+        }
+
+        function saveToStorage(key, data) {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+            } catch (error) {
+                console.error(`Error saving ${key} to localStorage:`, error);
+            }
+        }
+
+        // Load data from localStorage
+        let storage = {
+            realTimeTodos: loadFromStorage('realTimeTodos', []),
+            recurringTodos: loadFromStorage('recurringTodos', []),
+            links: loadFromStorage('links', []),
+            quotes: loadFromStorage('quotes', ["The only way to do great work is to love what you do. - Steve Jobs"]),
+            texts: loadFromStorage('texts', [])
+        };
+
+        // Theme management
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        let isDark = loadFromStorage('isDarkTheme', false);
+
+        // Apply saved theme
+        function applyTheme() {
+            body.className = body.className.replace(/light|dark/, isDark ? 'dark' : 'light');
+            themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        }
+
+        applyTheme();
+
+        themeToggle.addEventListener('click', () => {
+            isDark = !isDark;
+            applyTheme();
+            saveToStorage('isDarkTheme', isDark);
+        });
+
+        // Time display in 12-hour format
+        function updateTime() {
+            const now = new Date();
+            const options = {
+                hour: 'numeric',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            };
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', options);
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Real-time todos with custom checkbox
+        const realTimeTodoInput = document.getElementById('realTimeTodoInput');
+        const addRealTimeTodoBtn = document.getElementById('addRealTimeTodo');
+        const realTimeTodosContainer = document.getElementById('realTimeTodos');
+
+        function renderRealTimeTodos() {
+            realTimeTodosContainer.innerHTML = storage.realTimeTodos.map((todo, index) => `
+                <div class="flex items-center gap-3 p-3 card rounded ${todo.completed ? 'opacity-50' : ''}">
+                    <div class="custom-checkbox ${todo.completed ? 'checked' : ''}" onclick="toggleRealTimeTodo(${index})">
+                        ${todo.completed ? '<i class="fas fa-check text-sm"></i>' : ''}
+                    </div>
+                    <span class="flex-1 ${todo.completed ? 'line-through' : ''}">${todo.text}</span>
+                    <button onclick="deleteRealTimeTodo(${index})" class="text-red-500 hover:text-red-700">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function addRealTimeTodo() {
+            const text = realTimeTodoInput.value.trim();
+            if (text) {
+                storage.realTimeTodos.push({ text, completed: false });
+                realTimeTodoInput.value = '';
+                saveToStorage('realTimeTodos', storage.realTimeTodos);
+                renderRealTimeTodos();
+            }
+        }
+
+        function toggleRealTimeTodo(index) {
+            storage.realTimeTodos[index].completed = !storage.realTimeTodos[index].completed;
+            saveToStorage('realTimeTodos', storage.realTimeTodos);
+            renderRealTimeTodos();
+        }
+
+        function deleteRealTimeTodo(index) {
+            storage.realTimeTodos.splice(index, 1);
+            saveToStorage('realTimeTodos', storage.realTimeTodos);
+            renderRealTimeTodos();
+        }
+
+        addRealTimeTodoBtn.addEventListener('click', addRealTimeTodo);
+        realTimeTodoInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addRealTimeTodo();
+        });
+
+        // Recurring todos (always fresh, no completion state)
+        const recurringTodosContainer = document.getElementById('recurringTodos');
+        const addRecurringTodoBtn = document.getElementById('addRecurringTodo');
+        const recurringTodoModal = document.getElementById('recurringTodoModal');
+
+        function renderRecurringTodos() {
+            recurringTodosContainer.innerHTML = storage.recurringTodos.map((todo, index) => `
+                <div class="recurring-todo-item flex items-center gap-3 p-3 rounded shadow-sm">
+                    <i class="${todo.icon} text-green-500 text-lg"></i>
+                    <span class="flex-1 font-medium">${todo.title}</span>
+                    <div class="flex gap-1">
+                        <button onclick="editRecurringTodo(${index})" class="text-blue-500 hover:text-blue-700 p-1">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteRecurringTodo(${index})" class="text-red-500 hover:text-red-700 p-1">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function editRecurringTodo(index) {
+            const todo = storage.recurringTodos[index];
+            document.getElementById('recurringTodoTitle').value = todo.title;
+            document.getElementById('recurringTodoIcon').value = todo.icon;
+            recurringTodoModal.setAttribute('data-editing', index);
+            recurringTodoModal.classList.remove('hidden');
+            recurringTodoModal.classList.add('flex');
+        }
+
+        function deleteRecurringTodo(index) {
+            storage.recurringTodos.splice(index, 1);
+            saveToStorage('recurringTodos', storage.recurringTodos);
+            renderRecurringTodos();
+        }
+
+        addRecurringTodoBtn.addEventListener('click', () => {
+            recurringTodoModal.removeAttribute('data-editing');
+            recurringTodoModal.classList.remove('hidden');
+            recurringTodoModal.classList.add('flex');
+        });
+
+        document.getElementById('cancelRecurringTodo').addEventListener('click', () => {
+            document.getElementById('recurringTodoTitle').value = '';
+            recurringTodoModal.classList.add('hidden');
+            recurringTodoModal.classList.remove('flex');
+        });
+
+        document.getElementById('saveRecurringTodo').addEventListener('click', () => {
+            const title = document.getElementById('recurringTodoTitle').value.trim();
+            const icon = document.getElementById('recurringTodoIcon').value;
+            const editingIndex = recurringTodoModal.getAttribute('data-editing');
+
+            if (title) {
+                if (editingIndex !== null) {
+                    storage.recurringTodos[parseInt(editingIndex)] = { title, icon };
+                } else {
+                    storage.recurringTodos.push({ title, icon });
+                }
+
+                document.getElementById('recurringTodoTitle').value = '';
+                saveToStorage('recurringTodos', storage.recurringTodos);
+                renderRecurringTodos();
+                recurringTodoModal.classList.add('hidden');
+                recurringTodoModal.classList.remove('flex');
+            }
+        });
+
+        // Links
+        const linksContainer = document.getElementById('linksList');
+        const addLinkBtn = document.getElementById('addLink');
+        const linkModal = document.getElementById('linkModal');
+
+        function renderLinks() {
+            linksContainer.innerHTML = storage.links.map((link, index) => `
+                <div class="flex items-center gap-3 p-3 card rounded">
+                    <i class="${link.icon} text-purple-500"></i>
+                    <a href="${link.url}" target="_blank" class="flex-1 hover:text-blue-500 truncate">${link.title}</a>
+                    <div class="flex gap-1">
+                        <button onclick="editLink(${index})" class="text-blue-500 hover:text-blue-700 p-1">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteLink(${index})" class="text-red-500 hover:text-red-700 p-1">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function editLink(index) {
+            const link = storage.links[index];
+            document.getElementById('linkTitle').value = link.title;
+            document.getElementById('linkUrl').value = link.url;
+            document.getElementById('linkIcon').value = link.icon;
+            linkModal.setAttribute('data-editing', index);
+            linkModal.classList.remove('hidden');
+            linkModal.classList.add('flex');
+        }
+
+        function deleteLink(index) {
+            storage.links.splice(index, 1);
+            saveToStorage('links', storage.links);
+            renderLinks();
+        }
+
+        addLinkBtn.addEventListener('click', () => {
+            linkModal.removeAttribute('data-editing');
+            linkModal.classList.remove('hidden');
+            linkModal.classList.add('flex');
+        });
+
+        document.getElementById('cancelLink').addEventListener('click', () => {
+            document.getElementById('linkTitle').value = '';
+            document.getElementById('linkUrl').value = '';
+            linkModal.classList.add('hidden');
+            linkModal.classList.remove('flex');
+        });
+
+        document.getElementById('saveLink').addEventListener('click', () => {
+            const title = document.getElementById('linkTitle').value.trim();
+            const url = document.getElementById('linkUrl').value.trim();
+            const icon = document.getElementById('linkIcon').value;
+            const editingIndex = linkModal.getAttribute('data-editing');
+
+            if (title && url) {
+                if (editingIndex !== null) {
+                    storage.links[parseInt(editingIndex)] = { title, url, icon };
+                } else {
+                    storage.links.push({ title, url, icon });
+                }
+
+                document.getElementById('linkTitle').value = '';
+                document.getElementById('linkUrl').value = '';
+                saveToStorage('links', storage.links);
+                renderLinks();
+                linkModal.classList.add('hidden');
+                linkModal.classList.remove('flex');
+            }
+        });
+
+        // Quotes
+        const quotesContainer = document.getElementById('quotesList');
+        const addQuoteBtn = document.getElementById('addQuote');
+
+        function renderQuotes() {
+            quotesContainer.innerHTML = storage.quotes.map((quote, index) => `
+                <div class="p-3 card rounded group">
+                    <div class="editable italic" ondblclick="editQuote(${index})" data-index="${index}">
+                        "${quote}"
+                    </div>
+                    <button onclick="deleteQuote(${index})" class="mt-2 text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function editQuote(index) {
+            const element = document.querySelector(`[data-index="${index}"]`);
+            const currentQuote = storage.quotes[index];
+            const input = document.createElement('textarea');
+            input.value = currentQuote;
+            input.className = 'w-full p-2 card rounded border-none outline-none resize-none';
+            input.rows = 2;
+
+            element.replaceWith(input);
+            input.focus();
+            input.select();
+
+            function saveEdit() {
+                const newQuote = input.value.trim();
+                if (newQuote) {
+                    storage.quotes[index] = newQuote;
+                    saveToStorage('quotes', storage.quotes);
+                }
+                renderQuotes();
+            }
+
+            input.addEventListener('blur', saveEdit);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    saveEdit();
+                }
+            });
+        }
+
+        function deleteQuote(index) {
+            storage.quotes.splice(index, 1);
+            saveToStorage('quotes', storage.quotes);
+            renderQuotes();
+        }
+
+        addQuoteBtn.addEventListener('click', () => {
+            const quote = prompt('Enter a motivational quote:');
+            if (quote && quote.trim()) {
+                storage.quotes.push(quote.trim());
+                saveToStorage('quotes', storage.quotes);
+                renderQuotes();
+            }
+        });
+
+        // Texts
+        const textsContainer = document.getElementById('textsList');
+        const addTextBtn = document.getElementById('addText');
+        const textModal = document.getElementById('textModal');
+
+        function renderTexts() {
+            textsContainer.innerHTML = storage.texts.map((text, index) => `
+                <div class="p-4 card rounded">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-semibold truncate pr-2">${text.title}</h4>
+                        <button onclick="deleteText(${index})" class="text-red-500 hover:text-red-700 flex-shrink-0">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="copyText(${index})" class="btn px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                        <button onclick="editTextContent(${index})" class="btn px-3 py-1 card rounded text-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function copyText(index) {
+            navigator.clipboard.writeText(storage.texts[index].content).then(() => {
+                const btn = event.target.closest('button');
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                btn.className = btn.className.replace('bg-blue-500 hover:bg-blue-600', 'bg-green-500');
+                setTimeout(() => {
+                    btn.innerHTML = original;
+                    btn.className = btn.className.replace('bg-green-500', 'bg-blue-500 hover:bg-blue-600');
+                }, 2000);
+            });
+        }
+
+        function editTextContent(index) {
+            const text = storage.texts[index];
+            document.getElementById('textTitle').value = text.title;
+            document.getElementById('textContent').value = text.content;
+
+            textModal.setAttribute('data-editing', index);
+            textModal.classList.remove('hidden');
+            textModal.classList.add('flex');
+        }
+
+        function deleteText(index) {
+            storage.texts.splice(index, 1);
+            saveToStorage('texts', storage.texts);
+            renderTexts();
+        }
+
+        addTextBtn.addEventListener('click', () => {
+            textModal.removeAttribute('data-editing');
+            textModal.classList.remove('hidden');
+            textModal.classList.add('flex');
+        });
+
+        document.getElementById('cancelText').addEventListener('click', () => {
+            document.getElementById('textTitle').value = '';
+            document.getElementById('textContent').value = '';
+            textModal.classList.add('hidden');
+            textModal.classList.remove('flex');
+        });
+
+        document.getElementById('saveText').addEventListener('click', () => {
+            const title = document.getElementById('textTitle').value.trim();
+            const content = document.getElementById('textContent').value.trim();
+            const editingIndex = textModal.getAttribute('data-editing');
+
+            if (title && content) {
+                if (editingIndex !== null) {
+                    storage.texts[parseInt(editingIndex)] = { title, content };
+                } else {
+                    storage.texts.push({ title, content });
+                }
+
+                document.getElementById('textTitle').value = '';
+                document.getElementById('textContent').value = '';
+                saveToStorage('texts', storage.texts);
+                renderTexts();
+                textModal.classList.add('hidden');
+                textModal.classList.remove('flex');
+            }
+        });
+
+        // Initialize
+        renderRealTimeTodos();
+        renderRecurringTodos();
+        renderLinks();
+        renderQuotes();
+        renderTexts();
+    </script>
+</body>
+
+</html>
