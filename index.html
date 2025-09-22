@@ -38,6 +38,21 @@
             transition: all 0.3s ease;
         }
 
+        /* For WebKit browsers (Chrome, Safari, newer Edge, Opera) */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* For Firefox */
+        .hide-scrollbar {
+            scrollbar-width: none;
+        }
+
+        /* For Internet Explorer 10+ and old Edge */
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+        }
+
         .card {
             background: var(--bg-secondary);
             border: 1px solid var(--bg-tertiary);
@@ -115,7 +130,7 @@
     </style>
 </head>
 
-<body class="min-h-screen p-4 light">
+<body class="min-h-screen p-4 light overflow-y-auto hide-scrollbar">
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div class="flex items-center gap-4">
@@ -144,7 +159,7 @@
                     <i class="fas fa-plus"></i>
                 </button>
             </div>
-            <div id="realTimeTodos" class="space-y-2 max-h-60 overflow-y-auto"></div>
+            <div id="realTimeTodos" class="space-y-2 max-h-60 overflow-y-auto hide-scrollbar"></div>
         </div>
 
         <!-- Recurring Todos -->
@@ -159,7 +174,7 @@
                     <i class="fas fa-plus"></i> Add
                 </button>
             </div>
-            <div id="recurringTodos" class="space-y-3 max-h-60 overflow-y-auto"></div>
+            <div id="recurringTodos" class="space-y-3 max-h-60 overflow-y-auto hide-scrollbar"></div>
         </div>
 
         <!-- Frequently Used Links -->
@@ -173,7 +188,7 @@
                     <i class="fas fa-plus"></i> Add
                 </button>
             </div>
-            <div id="linksList" class="space-y-3 max-h-60 overflow-y-auto"></div>
+            <div id="linksList" class="space-y-3 max-h-60 overflow-y-auto hide-scrollbar"></div>
         </div>
 
         <!-- Motivation Quotes -->
@@ -188,7 +203,7 @@
                     <i class="fas fa-plus"></i> Add
                 </button>
             </div>
-            <div id="quotesList" class="space-y-3 max-h-60 overflow-y-auto"></div>
+            <div id="quotesList" class="space-y-3 max-h-60 overflow-y-auto hide-scrollbar"></div>
         </div>
 
         <!-- Frequently Used Texts -->
@@ -202,7 +217,7 @@
                     <i class="fas fa-plus"></i> Add
                 </button>
             </div>
-            <div id="textsList" class="grid gap-3 max-h-60 overflow-y-auto"></div>
+            <div id="textsList" class="grid gap-3 max-h-60 overflow-y-auto hide-scrollbar"></div>
         </div>
     </div>
 
